@@ -692,14 +692,10 @@ Public Class MainWindow
         Next
     End Sub
     Private Sub updateUI() Handles updateUITimer.Tick
-        If dsProcess Is Nothing Then
-            btnLaunchDS.Visible = true
-        Else
+        If Not dsProcess Is Nothing Then
             'Node display
             'Changes the comparison instruction to display it if value is 0, rather than changing the value itself
             chkDebugDrawing.Checked = dsProcess.DrawNodes
-
-            btnLaunchDS.Visible = False
 
             Dim maxNodes = dsProcess.MaxNodes
             ' Reading the value messes with input
@@ -731,7 +727,7 @@ Public Class MainWindow
 
             'errorCheckSteamName()
             txtLocalSteamName.Text = dsProcess.SelfSteamName
-            If txtLocalSteamName.Text.length > 15 Then 
+            If txtLocalSteamName.Text.Length > 15 Then
                 txtLocalSteamName.BackColor = Color.OrangeRed
             Else
                 txtLocalSteamName.BackColor = DefaultBackColor
@@ -747,8 +743,8 @@ Public Class MainWindow
             txtClearCount.Text = dsProcess.ClearCount
             txtTimePlayed.Text = TimeSpan.FromMilliseconds(dsProcess.TimePlayed).ToString("ddd\.hh\:mm\:ss")
 
-            txtRedCooldown.Text = math.Round(dsProcess.redCooldown, 0)
-            txtBlueCooldown.Text = math.Round(dsProcess.blueCooldown, 0)
+            txtRedCooldown.Text = Math.Round(dsProcess.redCooldown, 0)
+            txtBlueCooldown.Text = Math.Round(dsProcess.blueCooldown, 0)
 
 
             txtXPos.Text = Math.Round(dsProcess.xPos, 1)
@@ -784,7 +780,7 @@ Public Class MainWindow
             flaglist.Add("Dark Anor Londo", dsProcess.FlagsDarkAnorLondo)
             flaglist.Add("New Londo Drained", dsProcess.FlagsNewLondoDrained)
 
-            For Each item in flaglist.keys
+            For Each item In flaglist.Keys
                 Try
                     clbEventFlags.SetItemChecked(clbEventFlags.Items.IndexOf(item), flaglist.GetValues(item)(0))
                 Catch ex As Exception
@@ -1514,15 +1510,6 @@ Public Class MainWindow
 
     Private Sub dgvNodes_doubleclick(sender As Object, e As EventArgs) Handles dgvRecentNodes.DoubleClick, dgvFavoriteNodes.DoubleClick, dgvDSCMNet.DoubleClick
 
-    End Sub
-
-    Private Sub btnLaunchDS_Click(sender As Object, e As EventArgs) Handles btnLaunchDS.Click
-        Try
-            Dim proc As New System.Diagnostics.Process()
-            proc = Process.Start("steam://rungameid/211420", "")
-        Catch ex As Exception
-            MsgBox("Error launching." & Environment.NewLine & ex.Message)
-        End Try
     End Sub
 End Class
 

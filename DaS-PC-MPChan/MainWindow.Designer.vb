@@ -111,7 +111,6 @@ Partial Class MainWindow
         Me.whitelist = New System.Windows.Forms.CheckBox()
         Me.dsProcessStatus = New System.Windows.Forms.TextBox()
         Me.btnUpdate = New System.Windows.Forms.Button()
-        Me.btnLaunchDS = New System.Windows.Forms.Button()
         lblNodes = New System.Windows.Forms.Label()
         lblNodeDiv = New System.Windows.Forms.Label()
         lblYourId = New System.Windows.Forms.Label()
@@ -1080,26 +1079,14 @@ Partial Class MainWindow
         Me.btnUpdate.Size = New System.Drawing.Size(182, 23)
         Me.btnUpdate.TabIndex = 75
         Me.btnUpdate.Text = "Update DSCM"
-        Me.btnUpdate.UseVisualStyleBackColor = true
-        Me.btnUpdate.Visible = false
-        '
-        'btnLaunchDS
-        '
-        Me.btnLaunchDS.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right),System.Windows.Forms.AnchorStyles)
-        Me.btnLaunchDS.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0,Byte))
-        Me.btnLaunchDS.Location = New System.Drawing.Point(534, 453)
-        Me.btnLaunchDS.Name = "btnLaunchDS"
-        Me.btnLaunchDS.Size = New System.Drawing.Size(139, 23)
-        Me.btnLaunchDS.TabIndex = 76
-        Me.btnLaunchDS.Text = "Launch Dark Souls"
-        Me.btnLaunchDS.UseVisualStyleBackColor = true
+        Me.btnUpdate.UseVisualStyleBackColor = True
+        Me.btnUpdate.Visible = False
         '
         'MainWindow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6!, 13!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(784, 480)
-        Me.Controls.Add(Me.btnLaunchDS)
         Me.Controls.Add(Me.btnUpdate)
         Me.Controls.Add(Me.dsProcessStatus)
         Me.Controls.Add(Me.chkDSCMNet)
@@ -1202,7 +1189,6 @@ End Sub
     Friend WithEvents txtTimePlayed As TextBox
     Friend WithEvents txtRedCooldown As TextBox
     Friend WithEvents txtBlueCooldown As TextBox
-    Friend WithEvents btnLaunchDS As Button
     Friend WithEvents clbEventFlags As CheckedListBox
     Friend WithEvents tabDebugLog As System.Windows.Forms.TabPage
     Friend WithEvents chkLogDBG As System.Windows.Forms.CheckBox

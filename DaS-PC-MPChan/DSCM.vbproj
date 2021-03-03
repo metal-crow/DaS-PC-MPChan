@@ -206,7 +206,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)\packages\CommonMark.NET.0.12.0\tools\cmark.exe "$(SolutionDir)\Readme.md" --out  $(ProjectDir)Resources\Readme_compiled.html</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

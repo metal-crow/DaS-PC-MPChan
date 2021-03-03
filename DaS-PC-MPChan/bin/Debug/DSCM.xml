@@ -1,0 +1,49 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+DSCM
+</name>
+</assembly>
+<members>
+<member name="T:DSCM.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:DSCM.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:DSCM.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:DSCM.My.Resources.Resources.namecrash">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:DSCM.My.Resources.Resources.Readme">
+<summary>
+  Looks up a localized string similar to &lt;h1&gt;Instructions&lt;/h1&gt;
+&lt;ol&gt;
+&lt;li&gt;Start DSCM&lt;/li&gt;
+&lt;li&gt;Start Dark Souls&lt;/li&gt;
+&lt;li&gt;Enjoy Dark Souls Multiplayer :)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;Automatic node finding&lt;/h2&gt;
+&lt;p&gt;While DSCM-Net is active, it will automatically connect to players in the same
+area and in coop level range. Just have it running and enjoy working Dark Souls
+multiplayer.&lt;/p&gt;
+&lt;h2&gt;Manual Connecting&lt;/h2&gt;
+&lt;p&gt;You can also manually connect to a specific player like this:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Make sure you are connected to less than 20 nodes. You might wa [rest of string was truncated]&quot;;.
+</summary>
+</member>
+</members>
+</doc>
