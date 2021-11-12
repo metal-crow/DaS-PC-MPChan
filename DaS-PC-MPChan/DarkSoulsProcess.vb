@@ -225,9 +225,9 @@ Public Class DarkSoulsProcess
             Catch ex As Exception
                 'hard failure. no recovering the blocking feature now
                 'don't wait for a return here otherwise the auto-attach timer will call this function again
-                Dim thread as New Thread(
-                  Sub() 
-                    MsgBox(ex.Message, MsgBoxStyle.Critical)
+                Dim thread As New Thread(
+                  Sub()
+                      MsgBox(ex.Message, MsgBoxStyle.Critical)
                   End Sub
                 )
                 thread.Start()
@@ -237,11 +237,11 @@ Public Class DarkSoulsProcess
             Thread.Sleep(200)
         End While
         Dim success2 = Inject_ReceiveOnHitPacket()
-        If not success2 Then
+        If Not success2 Then
             'error injecting the hook
-            Dim thread2 as New Thread(
-              Sub() 
-                MsgBox("Unable to perform Inject_ReceiveOnHitPacket. Please inform developer", MsgBoxStyle.Critical)
+            Dim thread2 As New Thread(
+              Sub()
+                  MsgBox("Unable to perform Inject_ReceiveOnHitPacket. Please inform developer", MsgBoxStyle.Critical)
               End Sub
             )
             thread2.Start()
@@ -296,7 +296,7 @@ Public Class DarkSoulsProcess
 
             'check the exe to be sure it's actually dark souls
             Dim namestr(17) As Byte
-            ReadProcessMemory(targetProcessHandleTMP, &H15bc784, namestr, 18, vbNull)
+            ReadProcessMemory(targetProcessHandleTMP, &H15BC784, namestr, 18, vbNull)
             If Encoding.Unicode.GetChars(namestr) <> "DARKSOULS" Then
                 CloseHandle(targetProcessHandleTMP)
                 Throw New DSProcessAttachException("Detected that this isn't Dark Souls")
@@ -305,9 +305,9 @@ Public Class DarkSoulsProcess
             Try
                 _targetProcess = proc
                 _targetProcessHandle = targetProcessHandleTMP
-            If _targetProcessHandle = 0 Then
-                Throw New DSProcessAttachException("OpenProcess() failed. Check Permissions")
-            End If
+                If _targetProcessHandle = 0 Then
+                    Throw New DSProcessAttachException("OpenProcess() failed. Check Permissions")
+                End If
             Catch ex As Exception
 
             End Try
@@ -412,13 +412,13 @@ Public Class DarkSoulsProcess
                     namedNodeMemory = Nothing
                 End If
             End If
-     
+
         End Set
     End Property
 
     Private Sub InstallNamecrashFix()
-        Dim originalContent() As Byte = {&H66, &H8B, &H10, &H83, &HC0, &H02, &H66, &H85, &HD2}
-        Dim processContent = ReadBytes(dsBase + &H058A46, originalContent.Length)
+        Dim originalContent() As Byte = {&H66, &H8B, &H10, &H83, &HC0, &H2, &H66, &H85, &HD2}
+        Dim processContent = ReadBytes(dsBase + &H58A46, originalContent.Length)
         If Not processContent.SequenceEqual(originalContent) Then
             'The memory is not as expected. We have probably already installed the hooks
             Return
@@ -426,7 +426,7 @@ Public Class DarkSoulsProcess
 
         'The machinecode and all the mechanics behind this are courtesy of eur0pa
         Dim code() As Byte = My.Resources.namecrash.Clone()
-        
+
         'Offsets which we want to point to our buffer
         Dim bufferLocations = New Dictionary(Of Integer, Integer) From {
             {1, 204},
@@ -435,22 +435,22 @@ Public Class DarkSoulsProcess
         }
         'This is (hook offset in DS, target offset in code)
         Dim hookLocations = New Dictionary(Of Integer, Integer) From {
-            {&H058A46, 0},
+            {&H58A46, 0},
             {&H82AA00, 26},
             {&H9B2B70, 55},
             {&H7EFC60, 84},
             {&H39C4A3, 114},
-            {&H058A62, 145},
+            {&H58A62, 145},
             {&H18CACF, 176}
         }
         'This is (return offset in DS, jmp offset in code)
         Dim returnLocations As New Dictionary(Of Integer, Integer) From {
-            {&H058A51, 20},
+            {&H58A51, 20},
             {&H82AA12, 49},
             {&H9B2B82, 78},
             {&H7EFC71, 108},
             {&H39C4B2, 139},
-            {&H058A71, 170},
+            {&H58A71, 170},
             {&H18BD40, 250},
             {&H18CB21, 275},
             {&H18CAD6, 255}
@@ -469,14 +469,14 @@ Public Class DarkSoulsProcess
             Dim instruction() As Byte = jmpInstruction.Concat(BitConverter.GetBytes(jmpOffset)).ToArray()
             Array.Copy(instruction, 0, code, returnLocation.Value, instruction.Length)
         Next
-        
+
         For Each bufferLocation In bufferLocations
             'Could make another buffer but might as well use the spare space in the existing one
             Dim bufOffset As Int32 = (memory.address + code.Length) + 20
             Dim instruction() As Byte = BitConverter.GetBytes(bufOffset).ToArray()
             Array.Copy(instruction, 0, code, bufferLocation.Value, instruction.Length)
         Next
-        
+
         WriteProcessMemory(_targetProcessHandle, memory, code, code.Length, 0)
 
         'Install the fix permanently
@@ -497,15 +497,15 @@ Public Class DarkSoulsProcess
         End If
 
         Dim code() As Byte = {
-            &H00, &H00, &H00, &H00, &H8B, &H44, &H24, &H04, &H8B, &H54, &H24, &H08, &H55, &HE8, &H00, &H00,
-            &H00, &H00, &H5D, &H81, &HED, &H12, &H00, &H00, &H00, &H52, &H50, &H89, &HE2, &HB8, &H04, &H00,
-            &H00, &H00, &HE8, &H1B, &H00, &H00, &H00, &H58, &H5A, &HB8, &H01, &H00, &H00, &H00, &H66, &H83,
-            &H7C, &H42, &HFE, &H00, &H74, &H03, &H40, &HEB, &HF5, &H01, &HC0, &HE8, &H02, &H00, &H00, &H00,
-            &H5D, &HC3, &H50, &H52, &H83, &HEC, &H04, &H89, &HE1, &H6A, &H00, &H51, &H50, &H52, &H8B, &H85,
-            &H00, &H00, &H00, &H00, &H50, &H8B, &H85, &H63, &H00, &H00, &H00, &HFF, &H10, &H83, &HC4, &H04,
-            &H5A, &H58, &HC3, &H60, &HC2, &H0C, &H01, &H90
+            &H0, &H0, &H0, &H0, &H8B, &H44, &H24, &H4, &H8B, &H54, &H24, &H8, &H55, &HE8, &H0, &H0,
+            &H0, &H0, &H5D, &H81, &HED, &H12, &H0, &H0, &H0, &H52, &H50, &H89, &HE2, &HB8, &H4, &H0,
+            &H0, &H0, &HE8, &H1B, &H0, &H0, &H0, &H58, &H5A, &HB8, &H1, &H0, &H0, &H0, &H66, &H83,
+            &H7C, &H42, &HFE, &H0, &H74, &H3, &H40, &HEB, &HF5, &H1, &HC0, &HE8, &H2, &H0, &H0, &H0,
+            &H5D, &HC3, &H50, &H52, &H83, &HEC, &H4, &H89, &HE1, &H6A, &H0, &H51, &H50, &H52, &H8B, &H85,
+            &H0, &H0, &H0, &H0, &H50, &H8B, &H85, &H63, &H0, &H0, &H0, &HFF, &H10, &H83, &HC4, &H4,
+            &H5A, &H58, &HC3, &H60, &HC2, &HC, &H1, &H90
         }
-        
+
         Dim pipeBytes() As Byte = BitConverter.GetBytes(CType(foreignWritePipe, UInt32))
         Array.Copy(pipeBytes, 0, code, 0, pipeBytes.Length)
 
@@ -516,7 +516,7 @@ Public Class DarkSoulsProcess
         Dim loggingFuncPtrLoc As IntPtr = &H136304C
         WriteProcessMemory(_targetProcessHandle, loggingFuncPtrLoc, funcAddressBytes, funcAddressBytes.Length, 0)
 
-        
+
         debugLogThread = New Thread(AddressOf DebugLogThreadMain)
         debugLogThread.IsBackground = True
         debugLogThread.Start()
@@ -524,7 +524,7 @@ Public Class DarkSoulsProcess
     Private Sub TearDownDebugLog()
         If IsNothing(debugLogMemory) Then Return
         Dim loggingFuncPtrLoc As IntPtr = &H136304C
-        Dim zero() As Byte = {0, 0, 0 ,0}
+        Dim zero() As Byte = {0, 0, 0, 0}
         WriteProcessMemory(_targetProcessHandle, loggingFuncPtrLoc, zero, zero.Length, 0)
         debugLogMemory.Dispose()
         debugLogMemory = Nothing
@@ -549,11 +549,11 @@ Public Class DarkSoulsProcess
             Else
                 TearDownDebugLog()
             End If
-            End Set
-        End Property
+        End Set
+    End Property
     Private Sub DebugLogThreadMain()
         Dim severityMap As New Dictionary(Of Integer, String)
-        severityMap.Add(200000001,  "DBG")
+        severityMap.Add(200000001, "DBG")
         severityMap.Add(1000000001, "INF")
         severityMap.Add(1300000001, "WRN")
         severityMap.Add(1400000001, "ERR")
@@ -572,7 +572,7 @@ Public Class DarkSoulsProcess
             DuplicateHandle(Process.GetCurrentProcess.Handle, selfHandle,
                             Process.GetCurrentProcess.Handle, selfHandleCopy, 0, True, 3)
             debugLogThreadHandle = selfHandleCopy
-            If Not ReadFile(debugLogPipeHandle, readBuffer, 8000, readBytes, 0) then
+            If Not ReadFile(debugLogPipeHandle, readBuffer, 8000, readBytes, 0) Then
                 Exit While
             Else
                 Dim bufferPos = 0
@@ -580,17 +580,17 @@ Public Class DarkSoulsProcess
                 SyncLock debugLog
                     While True
                         Dim strEnd = -1
-                        For p = bufferPos + 4 To buffer.Length-2 Step 2
+                        For p = bufferPos + 4 To buffer.Length - 2 Step 2
                             If buffer(p) = 0 AndAlso buffer(p + 1) = 0 Then
                                 strEnd = p
                                 Exit For
                             End If
                         Next
-                        If strEnd = -1
+                        If strEnd = -1 Then
                             buffer = buffer.Skip(bufferPos).ToArray()
                             Exit While
                         End If
-                    
+
                         Dim severity As UInt32 = BitConverter.ToUInt32(buffer, bufferPos)
                         Dim decoded As String = Encoding.Unicode.GetChars(buffer, bufferPos + 4, strEnd - bufferPos - 4)
                         bufferPos = strEnd + 2
@@ -611,15 +611,15 @@ Public Class DarkSoulsProcess
     Private Sub SetupLobbyDumpHook()
         'ASM in ASM\ASM-LobbyDump.txt
         Dim code() As Byte = {
-            &H50, &H53, &H51, &H52, &H56, &HE8, &H00, &H00, &H00, &H00, &H5B, &H81, &HEB, &H0A, &H00, &H00,
-            &H00, &H81, &HC3, &H00, &H00, &H00, &H00, &H81, &HC3, &H00, &H02, &H00, &H00, &H8B, &H70, &H08,
-            &H8B, &H48, &H04, &H89, &HF0, &H29, &HC8, &H3D, &H40, &H06, &H00, &H00, &H75, &H18, &H39, &HCE,
-            &H76, &H14, &H8B, &H41, &H18, &H8B, &H51, &H1C, &H83, &HC3, &H08, &H83, &HC1, &H20, &H89, &H43,
+            &H50, &H53, &H51, &H52, &H56, &HE8, &H0, &H0, &H0, &H0, &H5B, &H81, &HEB, &HA, &H0, &H0,
+            &H0, &H81, &HC3, &H0, &H0, &H0, &H0, &H81, &HC3, &H0, &H2, &H0, &H0, &H8B, &H70, &H8,
+            &H8B, &H48, &H4, &H89, &HF0, &H29, &HC8, &H3D, &H40, &H6, &H0, &H0, &H75, &H18, &H39, &HCE,
+            &H76, &H14, &H8B, &H41, &H18, &H8B, &H51, &H1C, &H83, &HC3, &H8, &H83, &HC1, &H20, &H89, &H43,
             &HF8, &H89, &H53, &HFC, &HEB, &HE8, &H5E, &H5A, &H59, &H5B, &H58
         }
 
 
-        Dim bufferSize = &H200 + 8*50
+        Dim bufferSize = &H200 + 8 * 50
         Dim hookLoc As IntPtr = dsBase + &H323A0D
         lobbyDumpMemory = New AllocatedMemory(_targetProcessHandle, bufferSize)
         lobbyDumpHook = New JmpHook(_targetProcessHandle, hookLoc, lobbyDumpMemory, 7)
@@ -628,7 +628,7 @@ Public Class DarkSoulsProcess
         lobbyDumpHook.Activate()
     End Sub
     Private Sub TearDownLobbyDumpHook()
-        If lobbyDumpHook IsNot Nothing THen
+        If lobbyDumpHook IsNot Nothing Then
             lobbyDumpHook.Dispose()
             lobbyDumpHook = Nothing
         End If
@@ -664,7 +664,7 @@ Public Class DarkSoulsProcess
         nodeDumpHook.Activate()
     End Sub
     Private Sub TearDownNodeDumpHook()
-        If nodeDumpHook IsNot Nothing THen
+        If nodeDumpHook IsNot Nothing Then
             nodeDumpHook.Dispose()
             nodeDumpHook = Nothing
         End If
@@ -706,6 +706,9 @@ Public Class DarkSoulsProcess
             Return ReadSteamIdAscii(ReadIntPtr(dsBase + &HF7E204) + &HA00)
         End Get
     End Property
+
+    Public Shared StaticSelfSteamID As String
+
     Public Property SelfSteamName As String
         Get
             Dim byt() As Byte
@@ -788,7 +791,7 @@ Public Class DarkSoulsProcess
 
 
         'Attempt at compiling ASM through new method
-        Dim a As New ASM
+        Dim a As New asm
         a.pos = CInt(connectMemory.address)
 
         a.AddVar("connectmemory", connectMemory.address)
@@ -825,11 +828,11 @@ Public Class DarkSoulsProcess
     Private Function Inject_ReceiveOnHitPacket() As Boolean
         Dim allocatedCodeSize = 512 'this should be plenty of space
 
-        Dim recieveType18Packet_location As IntPtr = &H0D2F8B4
-        Dim recieveType18Packet_abortread_location As IntPtr = &Hd2f87b
+        Dim recieveType18Packet_location As IntPtr = &HD2F8B4
+        Dim recieveType18Packet_abortread_location As IntPtr = &HD2F87B
 
         'Extremely weak check to be sure we're at the right spot
-        Dim checkBytes As Byte() = {&H39, &H1d, &H44, &Hd6, &H37, &H01}
+        Dim checkBytes As Byte() = {&H39, &H1D, &H44, &HD6, &H37, &H1}
         If Not ReadBytes(recieveType18Packet_location - 8, checkBytes.Length).SequenceEqual(checkBytes) Then
             Return False
         End If
@@ -839,17 +842,17 @@ Public Class DarkSoulsProcess
 
         'Init in-memory location to save the list of people who last hit us
         'save their steamid and the speffects they applied, and have room for 200
-        onHitListTmpStorageSteamId = New AllocatedMemory(_targetProcessHandle, (8+4+4)*onHitListTmpStorageSteamIdSize)
+        onHitListTmpStorageSteamId = New AllocatedMemory(_targetProcessHandle, (8 + 4 + 4) * onHitListTmpStorageSteamIdSize)
 
         'set up the list of forbidden SpEffects
         Dim badSpeffectList_VB() As UInt32 = {
-            6, 7, 13, 33, 34, 71, 72, 73, 74, 80, 1520, 1530, 3220, 3240, 3250, 5210, 5211, 5212, 5213, 
+            6, 7, 13, 33, 34, 71, 72, 73, 74, 80, 1520, 1530, 3220, 3240, 3250, 5210, 5211, 5212, 5213,
             5214, 5295, 5296, 5221, 5222, 5280, 5290, 5220, 5281, 5291, 5282, 5292, 5283, 5293, 5284, 5294,
             -1} 'include terminator
-        badSpeffectListSize = 4*badSpeffectList_VB.Length
+        badSpeffectListSize = 4 * badSpeffectList_VB.Length
         badSpeffectList = New AllocatedMemory(_targetProcessHandle, badSpeffectListSize)
-        For i As Integer = 0 To badSpeffectList_VB.Length-1:
-            WriteInt32(badSpeffectList.address + i*4, badSpeffectList_VB(i))
+        For i As Integer = 0 To badSpeffectList_VB.Length - 1
+            WriteInt32(badSpeffectList.address + i * 4, badSpeffectList_VB(i))
         Next
 
         'inject into the point in readparseType18NetMessage right before it would return the packet it recieved.
@@ -859,46 +862,46 @@ Public Class DarkSoulsProcess
         Dim badSpeffectList_asm_addr = BitConverter.GetBytes(CType(CType(badSpeffectList, IntPtr), Integer))
         Dim type18TmpStorageSteamId_asm_addr = BitConverter.GetBytes(CType(CType(type18TmpStorageSteamId, IntPtr), Integer))
 
-        Dim readType18MessagedetourCode() As Byte = { 
+        Dim readType18MessagedetourCode() As Byte = {
         &H50,
         &H53,
         &H51,
         &H52,
         &HB9, onHitListTmpStorageSteamId_asm_addr(0), onHitListTmpStorageSteamId_asm_addr(1), onHitListTmpStorageSteamId_asm_addr(2), onHitListTmpStorageSteamId_asm_addr(3),
-        &Hba, &H70, &H0c, &H00, &H00,
-        &H8a, &H04, &H11,
+        &HBA, &H70, &HC, &H0, &H0,
+        &H8A, &H4, &H11,
         &H88, &H44, &H11, &H10,
-        &H83, &Hfa, &H00,
-        &H4a,
-        &H7d, &Hf3,
-        &H8b, &H06,
-        &H8b, &H40, &H0c,
-        &H8b, &H58, &H2c,
-        &H89, &H59, &H04,
-        &H8b, &H58, &H28,
+        &H83, &HFA, &H0,
+        &H4A,
+        &H7D, &HF3,
+        &H8B, &H6,
+        &H8B, &H40, &HC,
+        &H8B, &H58, &H2C,
+        &H89, &H59, &H4,
+        &H8B, &H58, &H28,
         &H89, &H19,
-        &HA1, &HF8, &H88, &H40, &H01,
-        &H8B, &H1D, &H0C, &H89, &H40, &H01,
-        &H89, &H41, &H08,
-        &H89, &H59, &H0c,
+        &HA1, &HF8, &H88, &H40, &H1,
+        &H8B, &H1D, &HC, &H89, &H40, &H1,
+        &H89, &H41, &H8,
+        &H89, &H59, &HC,
         &HB9, badSpeffectList_asm_addr(0), badSpeffectList_asm_addr(1), badSpeffectList_asm_addr(2), badSpeffectList_asm_addr(3),
         &HBA, type18TmpStorageSteamId_asm_addr(0), type18TmpStorageSteamId_asm_addr(1), type18TmpStorageSteamId_asm_addr(2), type18TmpStorageSteamId_asm_addr(3),
         &H83, &H39, &HFF,
         &H74, &H3A,
-        &H3B, &H01,
-        &H74, &H09,
+        &H3B, &H1,
+        &H74, &H9,
         &H3B, &H19,
-        &H74, &H05,
-        &H83, &HC1, &H04,
+        &H74, &H5,
+        &H83, &HC1, &H4,
         &HEB, &HEE,
-        &H8B, &H06,
-        &H8B, &H40, &H0C,
+        &H8B, &H6,
+        &H8B, &H40, &HC,
         &H8B, &H58, &H2C,
-        &H89, &H5A, &H04,
+        &H89, &H5A, &H4,
         &H8B, &H58, &H28,
         &H89, &H1A,
-        &HC7, &H05, &HF8, &H88, &H40, &H01, &HFF, &HFF, &HFF, &HFF,
-        &HC7, &H05, &H0C, &H89, &H40, &H01, &HFF, &HFF, &HFF, &HFF,
+        &HC7, &H5, &HF8, &H88, &H40, &H1, &HFF, &HFF, &HFF, &HFF,
+        &HC7, &H5, &HC, &H89, &H40, &H1, &HFF, &HFF, &HFF, &HFF,
         &H5A,
         &H59,
         &H5B,
@@ -958,7 +961,7 @@ Public Class DarkSoulsProcess
         Dim epilog_ops() As Byte = {&H5B, &H8B, &HE5, &H5D}
         Dim epilogs_found = 0
         While True
-            Dim readP2PPacket_3_bytes = ReadBytes(readP2PPacket_3+readP2PPacket_3_end_offset, 4)
+            Dim readP2PPacket_3_bytes = ReadBytes(readP2PPacket_3 + readP2PPacket_3_end_offset, 4)
             If readP2PPacket_3_bytes.SequenceEqual(epilog_ops) Then
                 epilogs_found += 1
                 'add 4 to account for the epilog ops length
@@ -970,7 +973,7 @@ Public Class DarkSoulsProcess
                 End If
             Else
                 readP2PPacket_3_end_offset += 1
-                If readP2PPacket_3_end_offset < 0 Or readP2PPacket_3_end_offset > 1000
+                If readP2PPacket_3_end_offset < 0 Or readP2PPacket_3_end_offset > 1000 Then
                     Throw New ApplicationException("Unable to find last instruction in readP2PPacket function")
                 End If
             End If
@@ -998,22 +1001,22 @@ Public Class DarkSoulsProcess
 
         'for 1st instruction of sendP2PPacket, jump to a check if the target is in our blocklist. Immediate return if so
         'ASM in ASM\ASM-SendPacketBlockList.txt
-        Dim sendP2PdetourCode() As Byte = { 
+        Dim sendP2PdetourCode() As Byte = {
             &H50, &H53, &H51, &H52, &H8B, &H44, &H24, &H14, &H8B, &H54,
-            &H24, &H18, &HBB, &H00, &H00, &H00, &H00, &H8B, &H0D,
+            &H24, &H18, &HBB, &H0, &H0, &H0, &H0, &H8B, &HD,
             listtype_asm_addr(0), listtype_asm_addr(1), listtype_asm_addr(2), listtype_asm_addr(3),
-            &H83, &HF9, &H00, &H74, &H02, &HEB, &H1D, &HB9,
+            &H83, &HF9, &H0, &H74, &H2, &HEB, &H1D, &HB9,
             blocklist_asm_addr(0), blocklist_asm_addr(1), blocklist_asm_addr(2), blocklist_asm_addr(3),
-            &H3B, &H04, &H19, &H75, &H06, &H3B, &H54, &H19,
-            &H04, &H74, &H2A, &H83, &HC3, &H08, &H81, &HFB,
+            &H3B, &H4, &H19, &H75, &H6, &H3B, &H54, &H19,
+            &H4, &H74, &H2A, &H83, &HC3, &H8, &H81, &HFB,
             blocklist_asm_length(0), blocklist_asm_length(1), blocklist_asm_length(2), blocklist_asm_length(3),
             &H7C, &HEA, &HEB, &H24, &HB9,
             whitelist_asm_addr(0), whitelist_asm_addr(1), whitelist_asm_addr(2), whitelist_asm_addr(3),
-            &H3B, &H04, &H19, &H75, &H06, &H3B, &H54, &H19, &H04, &H74,
-            &H14, &H83, &HC3, &H08, &H81, &HFB,
+            &H3B, &H4, &H19, &H75, &H6, &H3B, &H54, &H19, &H4, &H74,
+            &H14, &H83, &HC3, &H8, &H81, &HFB,
             whitelist_asm_length(0), whitelist_asm_length(1), whitelist_asm_length(2), whitelist_asm_length(3),
-            &H7C, &HEA, &HEB, &H00, &H5A, &H59, &H5B, &H58, &HC2, &H18,
-            &H00, &H5A, &H59, &H5B, &H58 }
+            &H7C, &HEA, &HEB, &H0, &H5A, &H59, &H5B, &H58, &HC2, &H18,
+            &H0, &H5A, &H59, &H5B, &H58}
 
         Debug.Assert(sendP2PdetourCode.Count <= allocatedCodeSize, "You need more space for the SendP2PPacket code")
 
@@ -1030,22 +1033,22 @@ Public Class DarkSoulsProcess
         'for the last (return) instruction of ReadP2PPacket, jump to a check if the target that the function tells us the packet is from is in our blocklist. Return false if so
         'ASM in ASM\ASM-ReadPacketBlockList.txt
         Dim readP2PdetourCode() As Byte = {
-            &H50, &H53, &H51, &H52, &H8B, &H44, &H24, &H20, &H8B, &H00,
-            &H8B, &H54, &H24, &H20, &H8B, &H52, &H04, &HBB, &H00, &H00,
-            &H00, &H00, &H8B, &H0D,
+            &H50, &H53, &H51, &H52, &H8B, &H44, &H24, &H20, &H8B, &H0,
+            &H8B, &H54, &H24, &H20, &H8B, &H52, &H4, &HBB, &H0, &H0,
+            &H0, &H0, &H8B, &HD,
             listtype_asm_addr(0), listtype_asm_addr(1), listtype_asm_addr(2), listtype_asm_addr(3),
-            &H83, &HF9, &H00, &H74, &H02, &HEB, &H1D, &HB9,
+            &H83, &HF9, &H0, &H74, &H2, &HEB, &H1D, &HB9,
             blocklist_asm_addr(0), blocklist_asm_addr(1), blocklist_asm_addr(2), blocklist_asm_addr(3),
-            &H3B, &H04, &H19, &H75, &H06, &H3B, &H54, &H19, &H04, &H74,
-            &H2A, &H83, &HC3, &H08, &H81, &HFB,
+            &H3B, &H4, &H19, &H75, &H6, &H3B, &H54, &H19, &H4, &H74,
+            &H2A, &H83, &HC3, &H8, &H81, &HFB,
             blocklist_asm_length(0), blocklist_asm_length(1), blocklist_asm_length(2), blocklist_asm_length(3),
             &H7C, &HEA, &HEB, &H26, &HB9,
             whitelist_asm_addr(0), whitelist_asm_addr(1), whitelist_asm_addr(2), whitelist_asm_addr(3),
-            &H3B, &H04, &H19, &H75, &H06, &H3B, &H54, &H19, &H04, &H74,
-            &H16, &H83, &HC3, &H08, &H81, &HFB,
+            &H3B, &H4, &H19, &H75, &H6, &H3B, &H54, &H19, &H4, &H74,
+            &H16, &H83, &HC3, &H8, &H81, &HFB,
             whitelist_asm_length(0), whitelist_asm_length(1), whitelist_asm_length(2), whitelist_asm_length(3),
-            &H7C, &HEA, &HEB, &H00, &H5A, &H59, &H5B, &H58, &HB0, &H00,
-            &HC2, &H14, &H00, &H5A, &H59, &H5B, &H58 }
+            &H7C, &HEA, &HEB, &H0, &H5A, &H59, &H5B, &H58, &HB0, &H0,
+            &HC2, &H14, &H0, &H5A, &H59, &H5B, &H58}
 
         Debug.Assert(readP2PdetourCode.Count <= allocatedCodeSize, "You need more space for the ReadP2PPacket code")
 
@@ -1064,7 +1067,7 @@ Public Class DarkSoulsProcess
     End Function
 
     Public Sub Sync_MemoryBlockList(blockednodes As DataGridViewRowCollection)
-        Debug.Assert(blocklistInMemorySize >= blockednodes.Count * 8, "Blocklist of size="+blockednodes.Count.ToString()+" larger than allocated memory of count="+blocklistInMemorySize.ToString()+". Need to increase size.")
+        Debug.Assert(blocklistInMemorySize >= blockednodes.Count * 8, "Blocklist of size=" + blockednodes.Count.ToString() + " larger than allocated memory of count=" + blocklistInMemorySize.ToString() + ". Need to increase size.")
 
         'convert steam64 strings to in-memory (steam64) ints
         Dim steamid_array(blocklistInMemorySize) As Byte
@@ -1073,7 +1076,7 @@ Public Class DarkSoulsProcess
             'remove the postfix notation about the block type from the id
             Dim steamID As String = blockNode.Cells("steamId").Value
             If steamID.Contains("_") Then
-                steamID = steamID.Remove(steamID.LastIndexOf("_"),2)
+                steamID = steamID.Remove(steamID.LastIndexOf("_"), 2)
             End If
 
             Dim upperSteamId() As Byte = BitConverter.GetBytes(Convert.ToInt32(Microsoft.VisualBasic.Left(steamID, 8), 16))
@@ -1093,7 +1096,7 @@ Public Class DarkSoulsProcess
     End Sub
 
     Public Sub Sync_MemoryWhiteList(whitenodes As String())
-        Debug.Assert(WhitelistInMemorySize >= whitenodes.Count * 8, "Whitelist larger than allocated memory. Need to increase size.")
+        Debug.Assert(whitelistInMemorySize >= whitenodes.Count * 8, "Whitelist larger than allocated memory. Need to increase size.")
 
         'convert steam64 strings to in-memory (steam64) ints
         Dim steamid_array(whitelistInMemorySize) As Byte
@@ -1118,6 +1121,7 @@ Public Class DarkSoulsProcess
     End Sub
 
     Public Sub UpdateNodes()
+        StaticSelfSteamID = SelfSteamId
         Dim nodeCount As Integer = ReadInt32(dsBase + &HF62DD0)
         Dim basicNodeInfo As New Dictionary(Of String, String)
         Dim steamNodeList = ReadInt32(dsBase + &HF62DCC)
@@ -1181,8 +1185,8 @@ Public Class DarkSoulsProcess
         Dim connectionListEntry = ReadIntPtr(connectionList)
         Dim connection As IntPtr
         While connectionListEntry <> connectionList
-            connection = ReadIntPtr(connectionListEntry + &H08)
-            Dim connectionStatus = ReadInt32(connection + &H08)
+            connection = ReadIntPtr(connectionListEntry + &H8)
+            Dim connectionStatus = ReadInt32(connection + &H8)
             If connectionStatus > 2 Then
                 nodeSteamId = LCase(Hex(ReadUInt64(connection + &H170))).PadLeft(16, "0")
                 If ConnectedNodes.ContainsKey(nodeSteamId) Then

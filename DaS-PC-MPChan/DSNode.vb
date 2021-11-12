@@ -136,59 +136,119 @@ Public Class DSNode
     End Property
     Public ReadOnly Property MPZoneColumn As String
         Get
-            If (MPZone = 103000) Then                 ' I have no idea how to write a switch in this godforsaken language 
-                Return "Lobby:Bloodgulch"
-            ElseIf (MPZone = 103010) Then
-                Return "Bloodgulch"
-            ElseIf (MPZone = 103020) Then
-                Return "Lobby:Hang'Em:CTL"
-            ElseIf (MPZone = 103030) Then
-                Return "Hang'Em:CTL"
-            ElseIf (MPZone = 103040) Then
-                Return "Lobby:Hang'Em:TDM"
-            ElseIf (MPZone = 103050) Then
-                Return "Hang'Em:TDM"
-            ElseIf (MPZone = 103060) Then
-                Return "Lobby:Damnation"
-            ElseIf (MPZone = 103070) Then
-                Return "Damnation"
-            ElseIf (MPZone = 103080) Then
-                Return "Lobby:Sanctuary:TDM"
-            ElseIf (MPZone = 103090) Then
-                Return "Sanctuary : TDM"
-            ElseIf (MPZone = 103100) Then
-                Return "Lobby:Sanctuary:CTL"
-            ElseIf (MPZone = 103110) Then
-                Return "Sanctuary:CTL"
-            ElseIf (MPZone = 103120) Then
-                Return "Lobby:Lockout"
-            ElseIf (MPZone = 103130) Then
-                Return "Lockout"
-            ElseIf (MPZone = 103140) Then
-                Return "Lobby:Wizard"
-            ElseIf (MPZone = 103150) Then
-                Return "Wizard"
-            ElseIf (MPZone = 103160) Then
-                Return "Lobby:Prisoner"
-            ElseIf (MPZone = 103170) Then
-                Return "Prisoner"
-            ElseIf (MPZone = 103180) Then
-                Return "Lobby:Chillout"
-            ElseIf (MPZone = 103190) Then
-                Return "Chillout"
-            ElseIf (MPZone = 103200) Then
-                Return "Lobby:Ivory Tower"
-            ElseIf (MPZone = 103210) Then
-                Return "Ivory Tower"
-            ElseIf (MPZone = 103220) Then
-                Return "Lobby:Death Island"
-            ElseIf (MPZone = 103230) Then
-                Return "Death Island"
-            ElseIf (MPZone = 103240) Then
-                Return "Lobby:Crossfire"
-            ElseIf (MPZone = 103250) Then
-                Return "Crossfire"
+            Dim Client = SteamId = DarkSoulsProcess.StaticSelfSteamID
+            If Client Then
+                Select Case MPZone                      'This is how you make a switch in this godforsaken language
+                    Case 103000
+                        Return "Lobby:Bloodgulch"
+                    Case 103010
+                        Return "Bloodgulch"
+                    Case 103020
+                        Return "Lobby:Hang'Em:CTL"
+                    Case 103030
+                        Return "Hang'Em:CTL"
+                    Case 103040
+                        Return "Lobby:Hang'Em:TDM"
+                    Case 103050
+                        Return "Hang'Em:TDM"
+                    Case 103060
+                        Return "Lobby:Damnation"
+                    Case 103070
+                        Return "Damnation"
+                    Case 103080
+                        Return "Lobby:Sanctuary:TDM"
+                    Case 103090
+                        Return "Sanctuary : TDM"
+                    Case 103100
+                        Return "Lobby:Sanctuary:CTL"
+                    Case 103110
+                        Return "Sanctuary:CTL"
+                    Case 103120
+                        Return "Lobby:Lockout"
+                    Case 103130
+                        Return "Lockout"
+                    Case 103140
+                        Return "Lobby:Wizard"
+                    Case 103150
+                        Return "Wizard"
+                    Case 103160
+                        Return "Lobby:Prisoner"
+                    Case 103170
+                        Return "Prisoner"
+                    Case 103180
+                        Return "Lobby:Chillout"
+                    Case 103190
+                        Return "Chillout"
+                    Case 103200
+                        Return "Lobby:Ivory Tower"
+                    Case 103210
+                        Return "Ivory Tower"
+                    Case 103220
+                        Return "Lobby:Death Island"
+                    Case 103230
+                        Return "Death Island"
+                    Case 103240
+                        Return "Lobby:Crossfire"
+                    Case 103250
+                        Return "Crossfire"
+                End Select
+            Else
+                Select Case MPZone                      'Non Client Areas
+                    Case 103000
+                        Return "Lobby:Bloodgulch"
+                    Case 103010
+                        Return "Bloodgulch"
+                    Case 103060
+                        Return "Lobby:Hang'Em:CTL" 'Shares with Damnation
+                    Case 103070
+                        Return "Hang'Em:CTL"
+                    Case 103040
+                        Return "Lobby:Hang'Em:TDM" 'Shares with Bloodgulch
+                    Case 103050
+                        Return "Hang'Em:TDM"
+                    Case 103020
+                        Return "Lobby:Damnation"
+                    Case 103030
+                        Return "Damnation"
+                    Case 103080
+                        Return "Lobby:Sanctuary:TDM" 'Shares with Bloodgulch
+                    Case 103090
+                        Return "Sanctuary : TDM"
+                    Case 103180
+                        Return "Lobby:Sanctuary:CTL" 'Shares with Chillout
+                    Case 103190
+                        Return "Sanctuary:CTL"
+                    Case 103160
+                        Return "Lobby:Lockout" 'Shares with Prisoner
+                    Case 103170
+                        Return "Lockout"
+                    Case 103140
+                        Return "Lobby:Wizard" 'Shares with Chillout
+                    Case 103150
+                        Return "Wizard"
+                    Case 103120
+                        Return "Lobby:Prisoner"
+                    Case 103130
+                        Return "Prisoner"
+                    Case 103100
+                        Return "Lobby:Chillout"
+                    Case 103110
+                        Return "Chillout"
+                    Case 103240
+                        Return "Lobby:Ivory Tower"
+                    Case 103250
+                        Return "Ivory Tower"
+                    Case 103220
+                        Return "Lobby:Death Island"
+                    Case 103230
+                        Return "Death Island"
+                    Case 103200
+                        Return "Lobby:Crossfire" 'Shares with Ivory Tower
+                    Case 103210
+                        Return "Crossfire"
+                End Select
             End If
+
             Return If(MPZone <= 0, "", MPZone)
         End Get
     End Property
