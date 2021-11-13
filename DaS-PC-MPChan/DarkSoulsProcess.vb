@@ -707,8 +707,6 @@ Public Class DarkSoulsProcess
         End Get
     End Property
 
-    Public Shared StaticSelfSteamID As String
-
     Public Property SelfSteamName As String
         Get
             Dim byt() As Byte
@@ -1121,7 +1119,6 @@ Public Class DarkSoulsProcess
     End Sub
 
     Public Sub UpdateNodes()
-        StaticSelfSteamID = SelfSteamId
         Dim nodeCount As Integer = ReadInt32(dsBase + &HF62DD0)
         Dim basicNodeInfo As New Dictionary(Of String, String)
         Dim steamNodeList = ReadInt32(dsBase + &HF62DCC)
