@@ -1284,6 +1284,13 @@ Public Class MainWindow
         idString = idString.ToLower()
         Dim idStringNoted = idString + blockType
 
+        'allow friends to cheat on each other
+        For Each Row In dgvFavoriteNodes.Rows
+            If Row.Cells("steamId").Value = idString Then
+                Return
+            End If
+        Next
+
         If dgvBlockedNodes.Rows.Count < 200 Then
             Dim BlockRegistryKey As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\DSCM\BlockedNodes", True)
             Dim str2 As String = Conversions.ToString(Convert.ToInt64(idString, 16))
