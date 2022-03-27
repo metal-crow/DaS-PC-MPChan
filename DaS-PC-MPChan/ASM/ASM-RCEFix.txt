@@ -1,0 +1,9 @@
+﻿ff d0					CALL       EAX
+66 89 07				MOV        word ptr [EDI],AX
+8d 8c 24 50 0a 00 00	LEA        ECX, [ESP + 0xc8 + 2440] #the end of the buffer
+39 cf					CMP        EDI, ECX
+7C 09					JL         nooverflow
+66 c7 07 00 00			MOV		   word ptr [EDI], 0
+66 B8 00 00             MOV		   AX, 0
+nooverflow:
+jmp		   darksouls.exe + &H308D20

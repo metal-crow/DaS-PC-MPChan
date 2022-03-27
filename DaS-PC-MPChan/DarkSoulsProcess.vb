@@ -216,6 +216,7 @@ Public Class DarkSoulsProcess
         If Not HasWatchdog Then
             InstallNamecrashFix()
         End If
+        InstallRCEFix()
         While True
             Try
                 Dim success = Inject_P2PPacket()
@@ -485,6 +486,42 @@ Public Class DarkSoulsProcess
             JmpHook.Permanent(_targetProcessHandle, (dsBase + hookLocation.Key), (memory.address + hookLocation.Value))
         Next
     End Sub
+
+    Private Sub InstallRCEFix()
+        Dim RCEFix_location As IntPtr = &H708d1b
+
+        Dim originalContent() As Byte = {&Hff, &Hd0, &H66, &H89, &H07}
+        Dim processContent = ReadBytes(RCEFix_location, originalContent.Length)
+        If Not processContent.SequenceEqual(originalContent) Then
+            'The memory is not as expected. We have probably already installed the hooks
+            Return
+        End If
+
+        'ASM in ASM\ASM-RCEFix.txt
+        Dim RCEFixCode() As Byte = {
+            &Hff, &Hd0,
+            &H66, &H89, &H07,
+            &H8d, &H8c, &H24, &H50, &H0a, &H00, &H00,
+            &H39, &Hcf,
+            &H7C, &H09,
+            &H66, &Hc7, &H07, &H00, &H00,
+            &H66, &HB8, &H00, &H00
+        }
+
+        Dim RCEFixDetour = New AllocatedMemory(_targetProcessHandle, 256)
+
+        'add the return jmp
+        Dim returnAddress = BitConverter.GetBytes(CType(RCEFix_location - (RCEFixDetour.address + RCEFixCode.Length), Int32))
+        RCEFixCode = RCEFixCode.Concat({&HE9}).ToArray() 'JMP
+        RCEFixCode = RCEFixCode.Concat(returnAddress).ToArray()
+
+        WriteProcessMemory(_targetProcessHandle, RCEFixDetour, RCEFixCode, 256, 0)
+
+        'Install the fix permanently
+        RCEFixDetour.Leak()
+        JmpHook.Permanent(_targetProcessHandle, RCEFix_location, RCEFixDetour)
+    End Sub
+
     Private Sub SetupDebugLog()
         Dim localWritePipe As New IntPtr()
         If Not CreatePipe(debugLogPipeHandle, localWritePipe, 0, 0) Then
