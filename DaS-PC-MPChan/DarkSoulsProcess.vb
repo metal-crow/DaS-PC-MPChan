@@ -74,8 +74,10 @@ Public Class JmpHook
     Private _oldInstructions As Byte()
     Private _isActive As Boolean
 
+    Private Declare Function VirtualProtectEx Lib "kernel32.dll" (hProcess As IntPtr, lpAddress As IntPtr, ByVal lpSize As UInt32, ByVal dwNewProtect As UInt32, ByRef dwOldProtect As UInt32) As Boolean
     Private Declare Function ReadProcessMemory Lib "kernel32" (ByVal hProcess As IntPtr, ByVal lpBaseAddress As IntPtr, ByVal lpBuffer() As Byte, ByVal iSize As Integer, ByRef lpNumberOfBytesRead As Integer) As Boolean
     Private Declare Function WriteProcessMemory Lib "kernel32" (ByVal hProcess As IntPtr, ByVal lpBaseAddress As IntPtr, ByVal lpBuffer() As Byte, ByVal iSize As Integer, ByRef lpNumberOfBytesWritten As Integer) As Boolean
+    Private Declare Function GetLastError Lib "kernel32" () As UInt32
 
     Sub New(targetProcessHandle As IntPtr, hookLocation As IntPtr, jmpTarget As IntPtr, Optional hookInstructionSize As UInt32 = 5)
         Debug.Assert(hookInstructionSize >= 5)
@@ -94,9 +96,17 @@ Public Class JmpHook
 
             Dim nopInstruction As Byte = &H90
             Dim replaceWith() As Byte = jmpInstruction.Concat(Enumerable.Repeat(nopInstruction, _oldInstructions.Length - 5)).ToArray()
-            WriteProcessMemory(_process, _hookLocation, replaceWith, replaceWith.Length, vbNull)
+
+            Dim oldProtectionOut As UInteger
+            Dim virtProcErr = VirtualProtectEx(_process, _hookLocation, replaceWith.Length, AllocatedMemory.PAGE_EXECUTE_READWRITE, oldProtectionOut)
+            Debug.Assert(virtProcErr, "JmpHook.Activate VirtualProtectEx failed. GetLastError=" + GetLastError().ToString())
+
+            Dim bytesWritten As UInteger
+            Dim writeErr = WriteProcessMemory(_process, _hookLocation, replaceWith, replaceWith.Length, bytesWritten)
+            Debug.Assert(writeErr, "JmpHook.Activate WriteProcessMemory failed. GetLastError=" + GetLastError().ToString())
+
             _isActive = True
-        End If
+            End If
     End Sub
     Public Overloads Sub Dispose() Implements IDisposable.Dispose
         If _isActive And _hookLocation <> 0 Then
@@ -144,6 +154,7 @@ Public Class DarkSoulsProcess
     Private Declare Function ReadFile Lib "kernel32" (ByVal fileHandle As IntPtr, ByVal buffer() As Byte, ByVal bytesToRead As Int32,  ByRef lpNumberOfBytesRead As Integer, ByVal overlapped As IntPtr) As Boolean
     Private Declare Function GetCurrentThread Lib "kernel32" () As IntPtr
     Private Declare Function CancelSynchronousIo Lib "kernel32" (ByVal hThread As IntPtr) As Boolean
+    Declare Function AllocConsole Lib "kernel32" () As Integer
 
     Public Const PROCESS_VM_READ = &H10
     Public Const TH32CS_SNAPPROCESS = &H2
@@ -301,7 +312,7 @@ Public Class DarkSoulsProcess
             If Encoding.Unicode.GetChars(namestr) <> "DARKSOULS" Then
                 CloseHandle(targetProcessHandleTMP)
                 Throw New DSProcessAttachException("Detected that this isn't Dark Souls")
-            End If
+        End If
 
             Try
                 _targetProcess = proc
