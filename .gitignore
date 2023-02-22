@@ -1,9 +1,6 @@
 # NuGet packages
 /packages
 
-# Build copy of readme
-Readme_compiled.html
-
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
