@@ -1,0 +1,166 @@
+<h1>Instructions</h1>
+<ol>
+<li>Start DSCM</li>
+<li>Start Dark Souls</li>
+<li>Enjoy Dark Souls Multiplayer :)</li>
+</ol>
+<h2>Global Blocklist</h2>
+<p><strong>If you think you've been added to the global blocklist incorrectly, open a PR or PM me on discord (MetalCrow#7285).</strong><br />
+I'll figure out what's going on and do my best to get you removed.</p>
+<h2>Automatic node finding</h2>
+<p>While DSCM-Net is active, it will automatically connect to players in the same
+area and in coop level range. Just have it running and enjoy working Dark Souls
+multiplayer.</p>
+<h2>Manual Connecting</h2>
+<p>You can also manually connect to a specific player like this:</p>
+<ol>
+<li>Make sure you are connected to less than 20 nodes. You might want to disable
+DCSM-Net, so you get less nodes.</li>
+<li>Copy the other player's steam profile URL or SteamID64 into the <code>Target</code> field.</li>
+<li>Click <code>Attempt Connection</code></li>
+<li>After a few seconds, they should appear in the <code>Active</code> tab.</li>
+<li>You might want to add the player to your favorites by selecting them in the
+Active list and clicking <code>Add Favorite</code></li>
+<li>Next time you can connect to the other player by double-clicking the
+favorites entry.</li>
+</ol>
+<h1>Troubleshooting</h1>
+<ul>
+<li>
+<p>This program <strong>does not work</strong> with the beta version of Dark Souls. Opt out of
+the beta in steam settings:</p>
+<ol>
+<li>Right click on Dark Souls in your game library in steam</li>
+<li>Go to properties and locate the &quot;betas&quot; tab</li>
+<li>Select an option that says &quot;none - opt out of all betas&quot;</li>
+</ol>
+</li>
+<li>
+<p>Make sure <a href="http://darksouls.wikidot.com/co-op">normal in-game variables for multiplayer
+activity</a> are accounted for. Players
+commonly forget that:</p>
+<ul>
+<li>The water must be drained in New Londo Ruins before the host can have any
+phantoms enter their world</li>
+<li>Areas that still have yellow fog gates (the ones that get cleared after
+placing the Lord Vessel) don't allow multiplayer activity</li>
+</ul>
+</li>
+<li>
+<p>Is your game crashing when getting invaded or trying to use someone's summon sign?</p>
+<ul>
+<li>This is the namecrash bug, which is unrelated to this mod.
+<ul>
+<li>Run PvP Watchdog, because it fixes this problem (read Named Nodes section below).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1>Features</h1>
+<p>Hotkeys:<br />
+Ctrl + 1 = Toggle Node Drawing</p>
+<p>Right click on players for context menu, which includes copy steamID.</p>
+<h2>Node Drawing</h2>
+<p>Enabling this shows a visualization of currently active connections.</p>
+<ul>
+<li>You are represented with the large circle in the middle.</li>
+<li>Other players are smaller circles that are connected to you with a line.</li>
+<li>In-game proximity is represented here. If a player is near you in-game, like
+you're standing in the same spot in a level, your circles will be close to
+each other.</li>
+<li>The fact that the player names are not drawn near the nodes they belong to is
+a known issue.</li>
+</ul>
+<h2>DSCM-Net</h2>
+<p>Due to constant problems with the default Steam matchmaking, DCSM contains its
+own matchmaking. All DSCM-Net clients report player info to a central location.
+You can have a look at this information in the DSCM-Net tab.</p>
+<p>DSCM uses this information to automatically connect you to appropriate players.
+Note that your covenant (and whether you are wearing its ring) will be taken
+into account in this process.</p>
+<h2>Active Nodes Tab</h2>
+<p>This displays a detailed list of the players you're connected to. It also shows
+their location in-game, and if they're human, hollow, or a phantom of some kind.</p>
+<p>This vastly helps with informing you if you have potential viable connections or
+not. Bear in mind it is not possible to know whether or not someone has their
+boss alive, so that aspect is still a guess from your end.</p>
+<h4>Row colors</h4>
+<p>The color of the row marks the usefulness that DSCM thinks that node has for
+you. That is based on Location, Soul Level, your Covenant and if you have your
+covenant ring equipped.</p>
+<p>Nodes that you added manually are highlighted in bold.</p>
+<h4>MP Area column</h4>
+<p>This column shows the invasion zone the player is in. <a href="http://darksouls.wikidot.com/invasion-spawn-locations">The wiki</a>
+has further details.</p>
+<h2>Favorites and Recent Tabs</h2>
+<p>The recent tab will fill up with your 70 most recent connections. Favorites can
+be added from either your active node tab or recent tab.
+When starting DSCM and every 10 minutes after, DSCM will interact with a script
+created and hosted by Chronial that checks the online status of your Recent and
+favorite nodes (max 100 combined). Steam privacy settings can make a node appear
+offline when they are not.</p>
+<h2>Disable FPS Disconnects</h2>
+<p>DSCM now disables Dark Souls' check that will kick you offline when your FPS dips
+low.</p>
+<h1>Covenants</h1>
+<p>DSCM adapts its connection behaviour to your covenant.</p>
+<ul>
+<li>The following covenants are considered coop covenants: Princess's Guard,
+Warrior of Sunlight, Way of White, <em>no covenant</em></li>
+<li>The following covenants are considered PvP covenants: Blade of the Darkmoon,
+Chaos Servant, Darkwraith, Forest Hunter, Gravelord Servant, Path of the
+Dragon</li>
+</ul>
+<p>If you are in a coop covenant, DSCM will preferably connect you to people that
+are in the same area and within coop level of you. For PvP covenants, DSCM will
+also consider players that you can invade and that can invade you. Also:</p>
+<ul>
+<li>If you are a <em>Forest Hunter</em> and have the <em>Cat Covenant Ring</em> equipped, you
+will be connected to people that are in Darkroot Garden and fulfill the level
+requirements for you invading them. This is indepedent of your own location.</li>
+<li>If you are a <em>Blade of the Darkmoon</em> and have the <em>Darkmoon Blade Covenant
+Ring</em> equipped, you will be connected to people that are in Anor Londo and
+fulfill the level requirements for you invading them, in the hopes that their
+Anor Londo is dark and you can punish them for your sins. This is independent
+of your own location. If you don't have the ring equipped, then you are
+preferably connected to players that are in the same are as you and have
+Indictments.</li>
+</ul>
+<h1>Blocking</h1>
+<p>DSCM now allows you to block players.<br />
+Users you block will not be able to connect to you by any means, such as direct connection, standard node gathering, or otherwise.</p>
+<ul>
+<li>Copy the other player's steam profile URL or SteamID64 into the <code>Block</code> field</li>
+<li>Click <code>Block Connection</code></li>
+</ul>
+<p>or</p>
+<ul>
+<li>Select the user you wish to block from your current connections</li>
+<li>Click <code>Add Block</code></li>
+</ul>
+<p>After a few seconds, they should appear in the <code>Block List</code> tab</p>
+<p>To remove a user from you block list, select the <code>Block List</code> tab, select a user, and press <code>Remove Block</code>.</p>
+<h1>White List</h1>
+<p>DSCM allows you to create a whitelist to only connect with certain players.<br />
+Right clicking on players in the &quot;Active&quot;, &quot;Favorite&quot;, &quot;Recent&quot;, and &quot;DSCM-Net&quot; tabs will allow you to add them to your whitelist by seleteing the add option.<br />
+Additionally, you can add them manually and clear your whitelist from the new whitelist tab, as well as remove them by right clicking and selecting the remove opetion.<br />
+This whitelist tab will create the &quot;whitelist.txt&quot; for you, and delete it if there is nobody on it.</p>
+<p><strong>Manual Creation</strong>:<br />
+Create a file called &quot;whitelist.txt&quot; in the same location as your DSCM exe.<br />
+On each line, put in the steam64 ID of a player you want to connect with (including yourself!).<br />
+Save the file, and check the Enable Whitelist button.<br />
+When the whitelist is enabled, you will connect to no-one except those in the whitelist text file.</p>
+<h1>Contact/ Bug Reports:</h1>
+<p>This program was created by Wulf, who can be found on reddit as
+<a href="https://www.reddit.com/u/wulf2k">/u/Wulf2k</a>.<br />
+This fork is maintained by Metal-Crow, who can be found on Discord as MetalCrow#7285.<br />
+As a backup you can try contacting <a href="https://www.reddit.com/u/illusorywall">/u/illusorywall</a>
+or <a href="https://twitter.com/illusorywall">@illusorywall</a>, but I can't help as much
+with the technical stuff.</p>
+<p>Source code is available at: <a href="https://github.com/metal-crow/DaS-PC-MPChan">https://github.com/metal-crow/DaS-PC-MPChan</a><br />
+Source code for the DSCM-Net server: <a href="https://github.com/Chronial/dscm-server">https://github.com/Chronial/dscm-server</a></p>
+<hr />
+<p>Brought to you by Lane Hatland (wulf2k@gmail.com).<br />
+With thanks to Illusorywall, Jellybaby44, Chronial, and many others.</p>
+
