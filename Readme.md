@@ -5,6 +5,10 @@ Instructions
 2. Start Dark Souls
 3. Enjoy Dark Souls Multiplayer :)
 
+How to Play Online
+===============
+If you can't get any connections, and you haven't set up a steam_appid.txt, follow this video: https://www.youtube.com/watch?v=z2Msdxrb-zU
+
 Global Blocklist
 ----------------------
 
