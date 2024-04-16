@@ -194,10 +194,6 @@ Public Class DarkSoulsProcess
             detachFromProcess()
             Throw New DSProcessAttachException("Dark Souls beta is not supported")
         End If
-        disableLowFPSDisonnect()
-        If Not HasWatchdog Then
-            InstallNamecrashFix()
-        End If
         SetupNodeDumpHook()
         SetupLobbyDumpHook()
     End Sub
@@ -351,73 +347,6 @@ Public Class DarkSoulsProcess
     End Property
 
     Private Sub InstallNamecrashFix()
-        Dim originalContent() As Byte = {&H66, &H8B, &H10, &H83, &HC0, &H02, &H66, &H85, &HD2}
-        Dim processContent = ReadBytes(dsBase + &H058A46, originalContent.Length)
-        If Not processContent.SequenceEqual(originalContent) Then
-            'The memory is not as expected. We have probably already installed the hooks
-            Return
-        End If
-
-        'The machinecode and all the mechanics behind this are courtesy of eur0pa
-        Dim code() As Byte = My.Resources.namecrash.Clone()
-        
-        'Offsets which we want to point to our buffer
-        Dim bufferLocations = New Dictionary(Of Integer, Integer) From {
-            {1, 204},
-            {2, 243},
-            {3, 264}
-        }
-        'This is (hook offset in DS, target offset in code)
-        Dim hookLocations = New Dictionary(Of Integer, Integer) From {
-            {&H058A46, 0},
-            {&H82AA00, 26},
-            {&H9B2B70, 55},
-            {&H7EFC60, 84},
-            {&H39C4A3, 114},
-            {&H058A62, 145},
-            {&H18CACF, 176}
-        }
-        'This is (return offset in DS, jmp offset in code)
-        Dim returnLocations As New Dictionary(Of Integer, Integer) From {
-            {&H058A51, 20},
-            {&H82AA12, 49},
-            {&H9B2B82, 78},
-            {&H7EFC71, 108},
-            {&H39C4B2, 139},
-            {&H058A71, 170},
-            {&H18BD40, 250},
-            {&H18CB21, 275},
-            {&H18CAD6, 255}
-        }
-
-
-        Dim memory As New AllocatedMemory(_targetProcessHandle, code.Length)
-        Dim jmpInstruction() As Byte = {&HE9}
-        For Each returnLocation In returnLocations
-            If returnLocation.Key = &H18BD40 Then
-                jmpInstruction = {&HE8}
-            Else
-                jmpInstruction = {&HE9}
-            End If
-            Dim jmpOffset As Int32 = (dsBase + returnLocation.Key) - (memory.address + returnLocation.Value) - 5
-            Dim instruction() As Byte = jmpInstruction.Concat(BitConverter.GetBytes(jmpOffset)).ToArray()
-            Array.Copy(instruction, 0, code, returnLocation.Value, instruction.Length)
-        Next
-        
-        For Each bufferLocation In bufferLocations
-            'Could make another buffer but might as well use the spare space in the existing one
-            Dim bufOffset As Int32 = (memory.address + code.Length) + 20
-            Dim instruction() As Byte = BitConverter.GetBytes(bufOffset).ToArray()
-            Array.Copy(instruction, 0, code, bufferLocation.Value, instruction.Length)
-        Next
-        
-        WriteProcessMemory(_targetProcessHandle, memory, code, code.Length, 0)
-
-        'Install the fix permanently
-        memory.Leak()
-        For Each hookLocation In hookLocations
-            JmpHook.Permanent(_targetProcessHandle, (dsBase + hookLocation.Key), (memory.address + hookLocation.Value))
-        Next
     End Sub
     Private Sub SetupDebugLog()
         Dim localWritePipe As New IntPtr()
@@ -554,7 +483,7 @@ Public Class DarkSoulsProcess
 
 
         Dim bufferSize = &H200 + 8*50
-        Dim hookLoc As IntPtr = dsBase + &H323A0D
+        Dim hookLoc As IntPtr = dsBase + &H32477D
         lobbyDumpMemory = New AllocatedMemory(_targetProcessHandle, bufferSize)
         lobbyDumpHook = New JmpHook(_targetProcessHandle, hookLoc, lobbyDumpMemory, 7)
         code = lobbyDumpHook.PatchCode(code)
@@ -585,7 +514,7 @@ Public Class DarkSoulsProcess
 
         'Note to self, buffer is overly large.  Trim down some day.
         Dim bufferSize = 4096
-        Dim hookLoc As IntPtr = dsBase + &H7E637E
+        Dim hookLoc As IntPtr = dsBase + &H7E5B3E
         nodeDumpMemory = New AllocatedMemory(_targetProcessHandle, bufferSize)
         nodeDumpHook = New JmpHook(_targetProcessHandle, hookLoc, nodeDumpMemory, 5)
 
@@ -637,27 +566,27 @@ Public Class DarkSoulsProcess
 
     Public ReadOnly Property SelfSteamId As String
         Get
-            Return ReadSteamIdAscii(ReadIntPtr(dsBase + &HF7E204) + &HA00)
+            Return ReadSteamIdAscii(ReadIntPtr(dsBase + &HF823C4) + &HA00)
         End Get
     End Property
     Public Property SelfSteamName As String
         Get
             Dim byt() As Byte
-            byt = ReadBytes(ReadIntPtr(dsBase + &HF62DD4) + &H30, &H40)
+            byt = ReadBytes(ReadIntPtr(dsBase + &HF66F94) + &H30, &H40)
             Return Encoding.Unicode.GetString(byt)
         End Get
         Set(value As String)
             Dim byt(&H22) As Byte
 
             byt = Encoding.Unicode.GetBytes(value)
-            WriteBytes(ReadIntPtr(dsBase + &HF62DD4) + &H30, byt)
+            WriteBytes(ReadIntPtr(dsBase + &HF66F94) + &H30, byt)
         End Set
     End Property
 
     Public Sub ConnectToSteamId(ByVal steamId As String)
         Dim data(70) As Byte
         data(0) = &H1
-        Dim selfSteamName As String = ReadSteamName(ReadInt32(dsBase + &HF62DD4) + &H30)
+        Dim selfSteamName As String = ReadSteamName(ReadInt32(dsBase + &HF66F94) + &H30)
         Dim selfSteamNameBytes() As Byte = Encoding.Unicode.GetBytes(selfSteamName)
         Array.Copy(selfSteamNameBytes, 0, data, 1, selfSteamNameBytes.Length)
 
@@ -671,7 +600,7 @@ Public Class DarkSoulsProcess
     Public Sub DisconnectSteamId(ByVal steamId As String)
         Dim data(70) As Byte
         data(0) = &H2
-        Dim selfSteamName As String = ReadSteamName(ReadInt32(dsBase + &HF62DD4) + &H30)
+        Dim selfSteamName As String = ReadSteamName(ReadInt32(dsBase + &HF66F94) + &H30)
         Dim selfSteamNameBytes() As Byte = Encoding.Unicode.GetBytes(selfSteamName)
         Array.Copy(selfSteamNameBytes, 0, data, 1, selfSteamNameBytes.Length)
 
@@ -765,9 +694,9 @@ Public Class DarkSoulsProcess
     End Sub
 
     Public Sub UpdateNodes()
-        Dim nodeCount As Integer = ReadInt32(dsBase + &HF62DD0)
+        Dim nodeCount As Integer = ReadInt32(dsBase + &HF66F90)
         Dim basicNodeInfo As New Dictionary(Of String, String)
-        Dim steamNodeList = ReadInt32(dsBase + &HF62DCC)
+        Dim steamNodeList = ReadInt32(dsBase + &HF66F8C)
         Dim steamNodesPtr As IntPtr = ReadIntPtr(steamNodeList)
         For i = 0 To nodeCount - 1
             Dim node As New DSNode
@@ -821,7 +750,7 @@ Public Class DarkSoulsProcess
             nodePtr += &H30
         End While
 
-        Dim sessionManagerAddress = dsBase + &HF62CC0
+        Dim sessionManagerAddress = dsBase + &HF66E80
         Dim p2pSystem = ReadIntPtr(sessionManagerAddress + &H64)
         Dim connectionList = ReadIntPtr(p2pSystem + &H54)
         Dim connectionListEntry = ReadIntPtr(connectionList)
