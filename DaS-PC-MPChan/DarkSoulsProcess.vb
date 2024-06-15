@@ -1001,7 +1001,7 @@ Public Class DarkSoulsProcess
 
         'search through the readP2PPacket function to get the end
         'in order to get the last _instruction_ (which could be the original retn or a leftover jmp from us in the past)
-        'find the known return chunk epilog, and get the 3rd one
+        'find the known return chunk epilog
         '(this will work as long as the function control flow doesn't change massively)
         Dim readP2PPacket_3_end_offset = 0
         Dim epilog_ops() As Byte = {&H5B, &H8B, &HE5, &H5D}
@@ -1013,8 +1013,8 @@ Public Class DarkSoulsProcess
                 'add 4 to account for the epilog ops length
                 readP2PPacket_3_end_offset += 4
 
-                'if this is the 3rd epilog, end
-                If epilogs_found = 3 Then
+                'if this is the 1st epilog, end
+                If epilogs_found = 1 Then
                     Exit While
                 End If
             Else
