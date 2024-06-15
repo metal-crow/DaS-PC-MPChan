@@ -375,7 +375,7 @@ Partial Class MainWindow
         Me.lblVer.Name = "lblVer"
         Me.lblVer.Size = New System.Drawing.Size(102, 20)
         Me.lblVer.TabIndex = 49
-        Me.lblVer.Text = "2022.02.12.1"
+        Me.lblVer.Text = "2024.06.14.0"
         '
         'chkExpand
         '
