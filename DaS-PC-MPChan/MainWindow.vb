@@ -927,6 +927,11 @@ Public Class MainWindow
                 dsProcessStatus.Text = " Attached to Dark Souls process"
                 dsProcessStatus.BackColor = System.Drawing.Color.FromArgb(200, 255, 200)
                 dsProcess.enableDebugLog = chkLoggerEnabled.Checked
+                Dim notice = dsProcess.PartialFailureInfo()
+                If String.IsNullOrEmpty(notice) = False Then
+                    dsProcessStatus.Text = "Attached: " & notice
+                    dsProcessStatus.BackColor = System.Drawing.Color.FromArgb(255, 255, 0)
+                End If
             Catch ex As DSProcessAttachException
                 dsProcessStatus.Text = " " & ex.Message
                 dsProcessStatus.BackColor = System.Drawing.Color.FromArgb(255, 200, 200)
@@ -947,7 +952,7 @@ Public Class MainWindow
             whitelist.Checked = False
             Exit Sub
         End If
-        If whitelist.Checked = True Then
+        If whitelist.Checked = True And dsProcess.blocklist_functional = True Then
             If My.Computer.FileSystem.FileExists(WhitelistLocation) Then
                 Try
                     'Read in the whitelist file

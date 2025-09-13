@@ -199,6 +199,10 @@ Public Class DarkSoulsProcess
     Private debugLogPipeHandle As IntPtr
     Public debugLog As New List(Of DebugLogEntry)
 
+    Public blocklist_functional As Boolean
+    Public packetmon_functional As Boolean
+    Private partial_error As String
+
     'Dark Souls
     Private dsBase As IntPtr = 0
     'Steam API
@@ -228,41 +232,62 @@ Public Class DarkSoulsProcess
             InstallNamecrashFix()
         End If
         InstallRCEFix()
-        While True
+
+        blocklist_functional = False
+        Dim blocklist_err = "Unable to patch steam networking. Please disable any steam betas or inform developer."
+        For index As Integer = 1 To 25
             Try
                 Dim success = Inject_P2PPacket()
                 If success Then
-                    Exit While
+                    blocklist_functional = True
+                    blocklist_err = ""
+                    Exit For
                 End If
             Catch ex As Exception
                 'hard failure. no recovering the blocking feature now
-                'don't wait for a return here otherwise the auto-attach timer will call this function again
-                Dim thread As New Thread(
-                  Sub()
-                      MsgBox(ex.Message, MsgBoxStyle.Critical)
-                  End Sub
-                )
-                thread.Start()
-                Throw New DSProcessAttachException("Unable to monitor packets")
+                blocklist_err = "Unable to patch steam networking: " + ex.Message + ". Please disable any steam betas or inform developer."
+                Exit For
             End Try
-            'soft failure. Just wait a bit then retry
+            'soft failure. Just wait a bit then retry. maybe it'll work :)
             Thread.Sleep(200)
-        End While
+        Next
+
+        packetmon_functional = False
+        Dim packetmon_err = "Unable to perform Inject_ReceiveOnHitPacket. Please inform developer"
         Dim success2 = Inject_ReceiveOnHitPacket()
-        If Not success2 Then
-            'error injecting the hook
-            Dim thread2 As New Thread(
-              Sub()
-                  MsgBox("Unable to perform Inject_ReceiveOnHitPacket. Please inform developer", MsgBoxStyle.Critical)
-              End Sub
-            )
-            thread2.Start()
-            Throw New DSProcessAttachException("Unable to check packets")
+        If success2 Then
+            packetmon_functional = True
+            packetmon_err = ""
         End If
+
         SetupNodeDumpHook()
         SetupLobbyDumpHook()
         Sync_MemoryBlockList(MainWindow.dgvBlockedNodes.Rows)
+
+        'inform if any partial failures if present
+        partial_error = ""
+        If packetmon_functional = False Or blocklist_functional = False Then
+            Dim thread As New Thread(
+                Sub()
+                    MsgBox(blocklist_err + packetmon_err, MsgBoxStyle.Critical)
+                End Sub
+            )
+            thread.Start()
+            If packetmon_functional = False And blocklist_functional = False Then
+                partial_error = "Error: Blocklist+DmgLog disabled"
+            ElseIf packetmon_functional = True And blocklist_functional = False Then
+                partial_error = "Error: Blocklist disabled"
+            ElseIf packetmon_functional = False And blocklist_functional = True Then
+                partial_error = "Error: DmgLog disabled"
+            End If
+        End If
     End Sub
+
+    Public ReadOnly Property PartialFailureInfo As String
+        Get
+            Return partial_error
+        End Get
+    End Property
 
     Public Overloads Sub Dispose() Implements IDisposable.Dispose
         If Not Me.disposed Then
@@ -1113,6 +1138,10 @@ Public Class DarkSoulsProcess
     End Function
 
     Public Sub Sync_MemoryBlockList(blockednodes As DataGridViewRowCollection)
+        If blocklist_functional = False Then
+            Return
+        End If
+
         Debug.Assert(blocklistInMemorySize >= blockednodes.Count * 8, "Blocklist of size=" + blockednodes.Count.ToString() + " larger than allocated memory of count=" + blocklistInMemorySize.ToString() + ". Need to increase size.")
 
         'convert steam64 strings to in-memory (steam64) ints
@@ -1142,6 +1171,10 @@ Public Class DarkSoulsProcess
     End Sub
 
     Public Sub Sync_MemoryWhiteList(whitenodes As String())
+        If blocklist_functional = False Then
+            Return
+        End If
+
         Debug.Assert(whitelistInMemorySize >= whitenodes.Count * 8, "Whitelist larger than allocated memory. Need to increase size.")
 
         'convert steam64 strings to in-memory (steam64) ints
