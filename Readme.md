@@ -12,7 +12,7 @@ If you can't get any connections, and you haven't set up a steam_appid.txt, foll
 Global Blocklist
 ----------------------
 
-**If you think you've been added to the global blocklist incorrectly, open a PR or PM me on discord (MetalCrow#7285).**  
+**If you think you've been added to the global blocklist incorrectly, open a PR or PM me on discord (@metal_crow).**  
 I'll figure out what's going on and do my best to get you removed.
 
 Automatic node finding
